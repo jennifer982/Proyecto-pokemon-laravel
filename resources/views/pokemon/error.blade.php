@@ -39,37 +39,6 @@
         justify-content: center;
     }
 
-    .poke-error-button {
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-        font-family: 'Press Start 2P', cursive;
-        font-size: 13px;
-        color: var(--pw-black);
-        background-color: var(--pw-white);
-        border: 3px solid var(--pw-black);
-        border-radius: 10px;
-        padding: 14px 28px;
-        box-shadow: 4px 4px 0px var(--pw-black);
-        text-decoration: none;
-        transition: transform 0.15s ease, box-shadow 0.15s ease;
-    }
-
-    .poke-error-button:hover {
-        color: var(--pw-black);
-        transform: translate(-2px, -2px);
-        box-shadow: 6px 6px 0px var(--pw-black);
-    }
-
-    .poke-error-button:active {
-        transform: translate(1px, 1px);
-        box-shadow: 2px 2px 0px var(--pw-black);
-    }
-
-    .poke-error-button svg {
-        flex-shrink: 0;
-    }
-
 </style>
 @endpush
 
@@ -104,7 +73,7 @@
 
         <div class="poke-error-button-wrap">
 
-            <a href="/pokemon" class="poke-error-button">
+            <a href="/pokemon" class="pw-button">
 
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                     <line x1="19" y1="12" x2="5" y2="12"></line>

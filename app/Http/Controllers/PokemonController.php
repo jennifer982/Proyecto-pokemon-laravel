@@ -30,18 +30,51 @@ class PokemonController extends Controller
 
         $data = $response->json();
 
+        $artwork = $data['sprites']['other']['official-artwork'] ?? [];
+
+        $stats = collect($data['stats'])->map(function ($stat) {
+            return [
+                'nombre' => $stat['stat']['name'],
+                'valor' => $stat['base_stat'],
+            ];
+        });
+
+        $movimientos = collect($data['moves'])
+            ->map(function ($move) {
+                $detalle = end($move['version_group_details']);
+
+                return [
+                    'nombre' => str_replace('-', ' ', $move['move']['name']),
+                    'metodo' => $detalle['move_learn_method']['name'],
+                    'nivel' => $detalle['level_learned_at'],
+                ];
+            })
+            ->sortBy('nivel')
+            ->groupBy('metodo');
+
         $pokemon = [
+            'id' => $data['id'],
             'nombre' => $data['name'],
-            'imagen' => $data['sprites']['front_default'],
-            'tipos' => collect($data['types'])->map(function ($type) {
-                return $type['type']['name'];
-            })->toArray(),
-            'hp' => $data['stats'][0]['base_stat'],
-            'ataque' => $data['stats'][1]['base_stat'],
-            'defensa' => $data['stats'][2]['base_stat'],
+            'imagen' => $artwork['front_default'] ?? $data['sprites']['front_default'],
+            'imagenShiny' => $artwork['front_shiny'] ?? $data['sprites']['front_shiny'] ?? null,
+            'tipos' => collect($data['types'])->pluck('type.name')->toArray(),
+            'habilidades' => collect($data['abilities'])->map(function ($ability) {
+                return [
+                    'nombre' => str_replace('-', ' ', $ability['ability']['name']),
+                    'oculta' => $ability['is_hidden'],
+                ];
+            }),
+            'altura' => $data['height'] / 10,
+            'peso' => $data['weight'] / 10,
+            'experiencia' => $data['base_experience'],
+            'stats' => $stats,
+            'movimientos' => $movimientos,
         ];
 
-        return view('pokemon.show', compact('pokemon'));
+        return view('pokemon.show', [
+            'pokemon' => $pokemon,
+            'bareLayout' => true,
+        ]);
     }
 }
 

@@ -140,6 +140,37 @@
             transform: translateX(-3px);
         }
 
+        .pw-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 13px;
+            color: var(--pw-black);
+            background-color: var(--pw-white);
+            border: 3px solid var(--pw-black);
+            border-radius: 10px;
+            padding: 14px 28px;
+            box-shadow: 4px 4px 0px var(--pw-black);
+            text-decoration: none;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .pw-button:hover {
+            color: var(--pw-black);
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px var(--pw-black);
+        }
+
+        .pw-button:active {
+            transform: translate(1px, 1px);
+            box-shadow: 2px 2px 0px var(--pw-black);
+        }
+
+        .pw-button svg {
+            flex-shrink: 0;
+        }
+
         @media (prefers-reduced-motion: reduce) {
             * {
                 animation-duration: 0.01ms !important;
