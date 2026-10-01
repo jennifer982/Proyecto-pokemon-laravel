@@ -140,6 +140,12 @@
           .from(ball, { opacity: 0, scale: 0.4, rotate: -120, duration: 0.6, ease: 'back.out(1.7)' }, '-=0.3')
           .from('[data-splash-button]', { opacity: 0, y: 16, duration: 0.35 }, '-=0.15');
 
+        document.addEventListener('visibilitychange', function () {
+            if (!document.hidden) {
+                tl.progress(1);
+            }
+        });
+
     });
 
 </script>

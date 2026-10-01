@@ -116,7 +116,11 @@
 
 <body>
 
-    @unless(request()->is('/'))
+    @php
+        $bareLayout = request()->is('/') || request()->is('pokemon');
+    @endphp
+
+    @unless($bareLayout)
 
         <nav class="navbar navbar-dark">
             <div class="container">
@@ -144,7 +148,7 @@
 
     @endunless
 
-    <main class="{{ request()->is('/') ? '' : 'container py-4' }}">
+    <main class="{{ $bareLayout ? '' : 'container py-4' }}">
 
         @yield('content')
 
