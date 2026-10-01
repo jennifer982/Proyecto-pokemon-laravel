@@ -86,7 +86,7 @@
                 </a>
 
                 <a class="btn btn-outline-light me-2" href="/pokemon">
-                    Pokémon
+                    Pokemon
                 </a>
 
                 <a class="btn btn-outline-light" href="/about">

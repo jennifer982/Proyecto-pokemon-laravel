@@ -18,7 +18,7 @@ class PokemonController extends Controller
             return view('pokemon.index', [
                 'pokemons' => [],
                 'search' => $request->query('search'),
-                'error' => 'No se pudo obtener la información de Pokémon.',
+                'error' => 'No se pudo obtener la informacion de Pokemon.',
             ]);
         }
 
@@ -44,7 +44,7 @@ class PokemonController extends Controller
 
             if (trim($search) === '') {
 
-                $error = 'Escribe un nombre de Pokémon para buscar.';
+                $error = 'Escribe un nombre de Pokemon para buscar.';
 
             } else {
 
@@ -73,7 +73,7 @@ class PokemonController extends Controller
 
         if (! $response->successful()) {
             return view('pokemon.error', [
-                'mensaje' => 'No se encontró el Pokémon solicitado.',
+                'mensaje' => 'No se encontro el Pokemon solicitado.',
             ]);
         }
 

@@ -41,7 +41,7 @@
             </div>
 
             <h5>
-                Estadísticas
+                Estadisticas
             </h5>
 
             <div class="row mt-3">

@@ -6,7 +6,7 @@
 <div class="text-center mb-5">
 
     <h1 class="pixel-title fw-bold">
-        Pokémon
+        Pokemon
     </h1>
 
     <p class="text-muted">
@@ -23,7 +23,7 @@
             type="text"
             name="search"
             class="form-control"
-            placeholder="Buscar Pokémon por nombre"
+            placeholder="Buscar Pokemon por nombre"
             value="{{ $search ?? '' }}"
         >
 
