@@ -138,6 +138,23 @@
         padding: 14px 4px 4px;
     }
 
+    .poke-skeleton .poke-card-img,
+    .poke-skeleton .poke-card-name-bar {
+        animation: poke-pulse 1.1s ease-in-out infinite;
+    }
+
+    .poke-skeleton .poke-card-name-bar {
+        width: 70%;
+        height: 12px;
+        border-radius: 6px;
+        background-color: #E6E6E6;
+    }
+
+    @keyframes poke-pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.4; }
+    }
+
 </style>
 @endpush
 
@@ -154,7 +171,7 @@
 
 <div class="poke-search-wrap" data-reveal>
 
-    <form action="/pokemon" method="GET" class="poke-search">
+    <form id="poke-search-form" action="/pokemon" method="GET" class="poke-search">
 
         <svg class="poke-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="11" cy="11" r="7"></circle>
@@ -162,54 +179,24 @@
         </svg>
 
         <input
+            id="poke-search-input"
             type="text"
             name="search"
             placeholder="Buscar Pokémon..."
             value="{{ $search ?? '' }}"
             aria-label="Buscar Pokemon por nombre"
+            autocomplete="off"
         >
 
     </form>
 
-    <p class="poke-hint">
-        @if($error)
-            {{ $error }}
-        @else
-            Resultados sugeridos
-        @endif
+    <p class="poke-hint" id="poke-hint">
+        Cargando Pokemon...
     </p>
 
 </div>
 
-<div class="poke-grid">
-
-    @forelse($pokemons as $pokemon)
-
-        <a href="/pokemon/{{ $pokemon['nombre'] }}" class="poke-card" data-card>
-
-            <div class="poke-card-img">
-
-                @if($pokemon['imagen'])
-                    <img src="{{ $pokemon['imagen'] }}" alt="{{ $pokemon['nombre'] }}" loading="lazy">
-                @endif
-
-            </div>
-
-            <div class="poke-card-name">
-                {{ $pokemon['nombre'] }}
-            </div>
-
-        </a>
-
-    @empty
-
-        <div class="poke-hint" style="grid-column: 1 / -1;">
-            No se encontro ningun Pokemon, por favor vuelve a intentar.
-        </div>
-
-    @endforelse
-
-</div>
+<div class="poke-grid" id="poke-grid"></div>
 
 @endsection
 
@@ -218,36 +205,144 @@
 
     document.addEventListener('DOMContentLoaded', function () {
 
-        if (typeof gsap === 'undefined') {
-            return;
-        }
+        var SPRITE_BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/';
+        var LIST_URL = 'https://pokeapi.co/api/v2/pokemon?limit=1351&offset=0';
+        var DEFAULT_COUNT = 20;
+        var MAX_RESULTS = 60;
 
-        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-            return;
-        }
+        var grid = document.getElementById('poke-grid');
+        var hint = document.getElementById('poke-hint');
+        var form = document.getElementById('poke-search-form');
+        var input = document.getElementById('poke-search-input');
 
-        var tl = gsap.timeline();
+        var canAnimate = typeof gsap !== 'undefined'
+            && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-        tl.from('[data-reveal]', {
-            opacity: 0,
-            y: -12,
-            duration: 0.4,
-            ease: 'power2.out',
-            stagger: 0.08,
-        });
+        var allPokemon = [];
+        var cardTween = null;
 
-        tl.from('[data-card]', {
-            opacity: 0,
-            y: 16,
-            duration: 0.35,
-            ease: 'power1.out',
-            stagger: 0.03,
-        }, '-=0.1');
+        var headerTl = canAnimate
+            ? gsap.from('[data-reveal]', { opacity: 0, y: -12, duration: 0.4, ease: 'power2.out', stagger: 0.08 })
+            : null;
 
         document.addEventListener('visibilitychange', function () {
             if (!document.hidden) {
-                tl.progress(1);
+                if (headerTl) headerTl.progress(1);
+                if (cardTween) cardTween.progress(1);
             }
+        });
+
+        function extractId(url) {
+            var match = url.match(/\/pokemon\/(\d+)\/?$/);
+            return match ? match[1] : null;
+        }
+
+        function cardHTML(pokemon) {
+            return '<a href="/pokemon/' + pokemon.name + '" class="poke-card" data-card>'
+                + '<div class="poke-card-img"><img src="' + SPRITE_BASE + pokemon.id + '.png" alt="' + pokemon.name + '" loading="lazy"></div>'
+                + '<div class="poke-card-name">' + pokemon.name + '</div>'
+                + '</a>';
+        }
+
+        function skeletonHTML() {
+            return '<div class="poke-card poke-skeleton">'
+                + '<div class="poke-card-img"></div>'
+                + '<div class="poke-card-name"><div class="poke-card-name-bar"></div></div>'
+                + '</div>';
+        }
+
+        function renderSkeleton(count) {
+            grid.innerHTML = new Array(count).fill(skeletonHTML()).join('');
+        }
+
+        function render(list, emptyMessage) {
+
+            if (!list.length) {
+                grid.innerHTML = '';
+                hint.textContent = emptyMessage;
+                return;
+            }
+
+            hint.textContent = 'Resultados sugeridos';
+            grid.innerHTML = list.map(cardHTML).join('');
+
+            if (canAnimate) {
+                cardTween = gsap.from('[data-card]', {
+                    opacity: 0,
+                    y: 16,
+                    duration: 0.3,
+                    ease: 'power1.out',
+                    stagger: 0.02,
+                });
+            }
+        }
+
+        function filterAndRender(term) {
+
+            var query = term.trim().toLowerCase();
+
+            if (query === '') {
+                render(allPokemon.slice(0, DEFAULT_COUNT));
+                return;
+            }
+
+            var matches = allPokemon.filter(function (pokemon) {
+                return pokemon.name.includes(query);
+            });
+
+            render(
+                matches.slice(0, MAX_RESULTS),
+                'No se encontro ningun Pokemon, por favor vuelve a intentar.'
+            );
+        }
+
+        function updateUrl(term) {
+            var url = new URL(window.location.href);
+
+            if (term.trim() === '') {
+                url.searchParams.delete('search');
+            } else {
+                url.searchParams.set('search', term);
+            }
+
+            window.history.replaceState({}, '', url);
+        }
+
+        renderSkeleton(DEFAULT_COUNT);
+
+        fetch(LIST_URL)
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error('request failed');
+                }
+                return response.json();
+            })
+            .then(function (data) {
+
+                allPokemon = data.results
+                    .map(function (pokemon) {
+                        return { name: pokemon.name, id: extractId(pokemon.url) };
+                    })
+                    .filter(function (pokemon) {
+                        return pokemon.id !== null;
+                    });
+
+                filterAndRender(input.value);
+            })
+            .catch(function () {
+                grid.innerHTML = '';
+                hint.textContent = 'No se pudo obtener la informacion de Pokemon.';
+            });
+
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+            updateUrl(input.value);
+            filterAndRender(input.value);
+        });
+
+        input.addEventListener('input', function () {
+            updateUrl(input.value);
+            filterAndRender(input.value);
         });
 
     });

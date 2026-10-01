@@ -10,59 +10,9 @@ class PokemonController extends Controller
 
     public function index(Request $request)
     {
-        $response = Http::get(
-            'https://pokeapi.co/api/v2/pokemon?limit=20'
-        );
-
-        if (! $response->successful()) {
-            return view('pokemon.index', [
-                'pokemons' => [],
-                'search' => $request->query('search'),
-                'error' => 'No se pudo obtener la informacion de Pokemon.',
-            ]);
-        }
-
-        $data = $response->json();
-
-        $pokemons = collect($data['results'])->map(function ($pokemon) {
-
-            $detailResponse = Http::get($pokemon['url']);
-
-            return [
-                'nombre' => $pokemon['name'],
-                'imagen' => $detailResponse->successful()
-                    ? $detailResponse->json()['sprites']['front_default']
-                    : null,
-            ];
-
-        })->toArray();
-
-        $search = $request->query('search');
-        $error = null;
-
-        if ($request->has('search')) {
-
-            if (trim($search) === '') {
-
-                $error = 'Escribe un nombre de Pokemon para buscar.';
-
-            } else {
-
-                $pokemons = array_filter($pokemons, function ($pokemon) use ($search) {
-
-                    return str_contains(
-                        strtolower($pokemon['nombre']),
-                        strtolower(trim($search))
-                    );
-
-                });
-            }
-        }
-
-        return view(
-            'pokemon.index',
-            compact('pokemons', 'search', 'error')
-        );
+        return view('pokemon.index', [
+            'search' => $request->query('search'),
+        ]);
     }
 
     public function show($name)
