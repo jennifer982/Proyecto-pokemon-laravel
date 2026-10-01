@@ -10,7 +10,7 @@
     </h1>
 
     <p class="text-muted">
-        Explora los Pokémon disponibles.
+        Explora los Pokemon disponibles.
     </p>
 
 </div>
@@ -87,7 +87,7 @@
         <div class="col-12">
 
             <div class="alert alert-warning text-center">
-                No se encontró ningún Pokémon.
+                No se encontro ningun Pokmon, por favor vuelve a intentar.
             </div>
 
         </div>

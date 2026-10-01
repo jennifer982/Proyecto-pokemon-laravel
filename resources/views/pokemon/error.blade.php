@@ -5,7 +5,7 @@
 <div class="text-center py-5">
 
     <h1 class="fw-bold">
-        Pokémon no encontrado
+        Pokemon no encontrado
     </h1>
 
     <p class="text-muted mt-3">
@@ -13,7 +13,7 @@
     </p>
 
     <a href="/pokemon" class="btn btn-primary mt-3">
-        Volver a Pokémon
+        Volver a Pokemon
     </a>
 
 </div>
