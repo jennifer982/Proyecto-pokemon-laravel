@@ -1,7 +1,23 @@
 
 @extends('layouts.app')
 
+@push('styles')
+<style>
+
+    .about-wrap {
+        max-width: 820px;
+        margin: 0 auto;
+        padding: 20px 24px 60px;
+    }
+
+</style>
+@endpush
+
 @section('content')
+
+@include('partials.poke-header')
+
+<div class="about-wrap">
 
 <div class="text-center py-5">
 
@@ -103,6 +119,8 @@
         </div>
 
     </div>
+
+</div>
 
 </div>
 

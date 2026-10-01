@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>PokeWiki</title>
 
@@ -122,11 +123,17 @@
             text-decoration: none;
         }
 
+        .poke-header-links {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
         .poke-back-link {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            margin-left: auto;
             font-family: 'Inter', Arial, sans-serif;
             font-weight: 600;
             font-size: 14px;

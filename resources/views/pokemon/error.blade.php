@@ -44,14 +44,7 @@
 
 @section('content')
 
-<div class="poke-header" data-reveal>
-
-    <a href="/" style="display:flex; align-items:center; gap:10px; text-decoration:none;">
-        <img src="{{ asset('pokeball.png') }}" alt="PokeWiki" class="poke-logo-ball">
-        <span class="poke-logo-text">PokeWiki</span>
-    </a>
-
-</div>
+@include('partials.poke-header')
 
 <div class="poke-error">
 

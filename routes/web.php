@@ -10,8 +10,12 @@ Route::get('/', function () {
 
 Route::get('/pokemon', [PokemonController::class, 'index']);
 
+Route::get('/pokemon-guardados', [PokemonController::class, 'guardados']);
+
 Route::get('/pokemon/{name}', [PokemonController::class, 'show']);
 
+Route::post('/pokemon/{name}/guardar', [PokemonController::class, 'guardar']);
+
 Route::get('/about', function () {
-    return view('about');
+    return view('about', ['bareLayout' => true]);
 });

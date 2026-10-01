@@ -30,12 +30,6 @@
 @push('styles')
 <style>
 
-    .show-header {
-        display: flex;
-        align-items: center;
-        padding: 20px 24px 0;
-    }
-
     .show-wrap {
         max-width: 820px;
         margin: 0 auto;
@@ -218,15 +212,18 @@
 
     .show-stat-track {
         background-color: #EDE3CC;
+        border: 1px solid #D8C9A3;
         border-radius: 999px;
         height: 10px;
         overflow: hidden;
     }
 
     .show-stat-fill {
+        display: block;
         height: 100%;
         border-radius: 999px;
-        background-color: {{ $mainColor }};
+        background-color: var(--pw-white);
+        box-shadow: 0 0 0 1px rgba(45, 45, 45, 0.08) inset;
         width: 0%;
         transition: width 1s ease;
     }
@@ -309,30 +306,66 @@
         margin-top: 34px;
     }
 
+    .save-float {
+        position: fixed;
+        right: 24px;
+        bottom: 24px;
+        z-index: 20;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-family: 'Inter', Arial, sans-serif;
+        font-weight: 700;
+        font-size: 14px;
+        color: var(--pw-white);
+        background-color: var(--pw-black);
+        border: none;
+        border-radius: 999px;
+        padding: 14px 22px;
+        box-shadow: 0 6px 16px rgba(45, 45, 45, 0.3);
+        cursor: pointer;
+        transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease;
+    }
+
+    .save-float:hover:not(:disabled) {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(45, 45, 45, 0.35);
+    }
+
+    .save-float:active:not(:disabled) {
+        transform: translateY(-1px) scale(0.97);
+    }
+
+    .save-float:disabled {
+        cursor: default;
+    }
+
+    .save-float.is-saved {
+        background-color: #3C9F5C;
+    }
+
+    .save-float.is-saving {
+        opacity: 0.75;
+    }
+
+    .save-float-icon-check {
+        display: none;
+    }
+
+    .save-float.is-saved .save-float-icon-save {
+        display: none;
+    }
+
+    .save-float.is-saved .save-float-icon-check {
+        display: block;
+    }
+
 </style>
 @endpush
 
 @section('content')
 
-<div class="show-header" data-reveal>
-
-    <a href="/" style="display:flex; align-items:center; gap:10px; text-decoration:none;">
-        <img src="{{ asset('pokeball.png') }}" alt="PokeWiki" class="poke-logo-ball">
-        <span class="poke-logo-text">PokeWiki</span>
-    </a>
-
-    <a href="/pokemon" class="poke-back-link">
-
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-        </svg>
-
-        Pokemon
-
-    </a>
-
-</div>
+@include('partials.poke-header')
 
 <div class="show-wrap">
 
@@ -413,7 +446,7 @@
 
     </div>
 
-    <div class="show-section" data-reveal>
+    <div class="show-section" data-reveal id="stats-section">
 
         <div class="show-section-title">Estadisticas</div>
 
@@ -431,7 +464,7 @@
 
     </div>
 
-    @if($pokemon['movimientos']->isNotEmpty())
+    @if($pokemon['movimientosPorMetodo']->isNotEmpty())
 
         <div class="show-section" data-reveal>
 
@@ -439,7 +472,7 @@
 
             <div class="show-moves-tabs" role="tablist">
 
-                @foreach($pokemon['movimientos'] as $metodo => $lista)
+                @foreach($pokemon['movimientosPorMetodo'] as $metodo => $lista)
                     <button
                         type="button"
                         class="show-moves-tab {{ $loop->first ? 'is-active' : '' }}"
@@ -454,7 +487,7 @@
 
             </div>
 
-            @foreach($pokemon['movimientos'] as $metodo => $lista)
+            @foreach($pokemon['movimientosPorMetodo'] as $metodo => $lista)
 
                 <div class="show-moves-panel {{ $loop->first ? 'is-active' : '' }}" data-moves-panel="{{ $metodo }}">
 
@@ -497,6 +530,31 @@
 
 </div>
 
+<button
+    type="button"
+    id="save-button"
+    class="save-float {{ $estaGuardado ? 'is-saved' : '' }}"
+    data-name="{{ $pokemon['nombre'] }}"
+    title="{{ $estaGuardado ? 'Guardado en base de datos' : 'Guardar en base de datos' }}"
+    {{ $estaGuardado ? 'disabled' : '' }}
+>
+
+    <svg class="save-float-icon-save" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+        <polyline points="7 3 7 8 15 8"></polyline>
+    </svg>
+
+    <svg class="save-float-icon-check" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+        <polyline points="20 6 9 17 4 12"></polyline>
+    </svg>
+
+    <span class="save-float-label">
+        {{ $estaGuardado ? 'Guardado' : 'Guardar' }}
+    </span>
+
+</button>
+
 @endsection
 
 @push('scripts')
@@ -509,16 +567,8 @@
 
         var tl = null;
 
-        function animateStats() {
-            document.querySelectorAll('[data-stat-fill]').forEach(function (bar) {
-                requestAnimationFrame(function () {
-                    bar.style.width = bar.dataset.value + '%';
-                });
-            });
-        }
-
         if (canAnimate) {
-            tl = gsap.timeline({ onComplete: animateStats });
+            tl = gsap.timeline();
             tl.from('[data-reveal]', {
                 opacity: 0,
                 y: 18,
@@ -526,8 +576,32 @@
                 ease: 'power2.out',
                 stagger: 0.1,
             });
-        } else {
-            animateStats();
+        }
+
+        function fillStats(container) {
+            container.querySelectorAll('[data-stat-fill]').forEach(function (bar) {
+                requestAnimationFrame(function () {
+                    bar.style.width = bar.dataset.value + '%';
+                });
+            });
+        }
+
+        var statsSection = document.getElementById('stats-section');
+
+        if (statsSection) {
+            if ('IntersectionObserver' in window) {
+                var statsObserver = new IntersectionObserver(function (entries) {
+                    entries.forEach(function (entry) {
+                        if (entry.isIntersecting) {
+                            fillStats(statsSection);
+                            statsObserver.unobserve(statsSection);
+                        }
+                    });
+                }, { threshold: 0.3 });
+                statsObserver.observe(statsSection);
+            } else {
+                fillStats(statsSection);
+            }
         }
 
         document.addEventListener('visibilitychange', function () {
@@ -544,6 +618,47 @@
                 var showingShiny = shinyBtn.classList.toggle('is-active');
                 shinyBtn.setAttribute('aria-pressed', showingShiny ? 'true' : 'false');
                 image.src = showingShiny ? image.dataset.shiny : image.dataset.normal;
+            });
+        }
+
+        var saveBtn = document.getElementById('save-button');
+
+        if (saveBtn) {
+            saveBtn.addEventListener('click', function () {
+
+                saveBtn.disabled = true;
+                saveBtn.classList.add('is-saving');
+
+                var token = document.querySelector('meta[name="csrf-token"]').content;
+
+                fetch('/pokemon/' + saveBtn.dataset.name + '/guardar', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': token,
+                        'Accept': 'application/json',
+                    },
+                })
+                    .then(function (response) { return response.json(); })
+                    .then(function (data) {
+
+                        saveBtn.classList.remove('is-saving');
+
+                        if (data.guardado) {
+                            saveBtn.classList.add('is-saved');
+                            saveBtn.title = 'Guardado en base de datos';
+                            saveBtn.querySelector('.save-float-label').textContent = 'Guardado';
+                        } else {
+                            saveBtn.disabled = false;
+                            saveBtn.title = data.mensaje || 'No se pudo guardar';
+                        }
+
+                    })
+                    .catch(function () {
+                        saveBtn.disabled = false;
+                        saveBtn.classList.remove('is-saving');
+                        saveBtn.title = 'No se pudo guardar';
+                    });
+
             });
         }
 

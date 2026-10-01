@@ -140,14 +140,7 @@
 
 @section('content')
 
-<div class="poke-header" data-reveal>
-
-    <a href="/" style="display:flex; align-items:center; gap:10px; text-decoration:none;">
-        <img src="{{ asset('pokeball.png') }}" alt="PokeWiki" class="poke-logo-ball">
-        <span class="poke-logo-text">PokeWiki</span>
-    </a>
-
-</div>
+@include('partials.poke-header')
 
 <div class="poke-search-wrap" data-reveal>
 
@@ -200,6 +193,7 @@
 
         var allPokemon = [];
         var cardTween = null;
+        var usingLocalBackup = false;
 
         var headerTl = canAnimate
             ? gsap.from('[data-reveal]', { opacity: 0, y: -12, duration: 0.4, ease: 'power2.out', stagger: 0.08 })
@@ -219,7 +213,7 @@
 
         function cardHTML(pokemon) {
             return '<a href="/pokemon/' + pokemon.name + '" class="poke-card" data-card>'
-                + '<div class="poke-card-img"><img src="' + SPRITE_BASE + pokemon.id + '.png" alt="' + pokemon.name + '" loading="lazy"></div>'
+                + '<div class="poke-card-img"><img src="' + pokemon.imagen + '" alt="' + pokemon.name + '" loading="lazy"></div>'
                 + '<div class="poke-card-name">' + pokemon.name + '</div>'
                 + '</a>';
         }
@@ -243,7 +237,9 @@
                 return;
             }
 
-            hint.textContent = 'Resultados sugeridos';
+            hint.textContent = usingLocalBackup
+                ? 'Sin conexion a la API, mostrando Pokemon guardados'
+                : 'Resultados sugeridos';
             grid.innerHTML = list.map(cardHTML).join('');
 
             if (canAnimate) {
@@ -288,6 +284,33 @@
             window.history.replaceState({}, '', url);
         }
 
+        function loadFromLocalBackup() {
+
+            fetch('/pokemon-guardados')
+                .then(function (response) {
+                    if (!response.ok) {
+                        throw new Error('request failed');
+                    }
+                    return response.json();
+                })
+                .then(function (data) {
+
+                    if (!data.length) {
+                        grid.innerHTML = '';
+                        hint.textContent = 'No se pudo obtener la informacion de Pokemon.';
+                        return;
+                    }
+
+                    usingLocalBackup = true;
+                    allPokemon = data;
+                    filterAndRender(input.value);
+                })
+                .catch(function () {
+                    grid.innerHTML = '';
+                    hint.textContent = 'No se pudo obtener la informacion de Pokemon.';
+                });
+        }
+
         renderSkeleton(DEFAULT_COUNT);
 
         fetch(LIST_URL)
@@ -301,18 +324,16 @@
 
                 allPokemon = data.results
                     .map(function (pokemon) {
-                        return { name: pokemon.name, id: extractId(pokemon.url) };
+                        var id = extractId(pokemon.url);
+                        return id ? { name: pokemon.name, imagen: SPRITE_BASE + id + '.png' } : null;
                     })
                     .filter(function (pokemon) {
-                        return pokemon.id !== null;
+                        return pokemon !== null;
                     });
 
                 filterAndRender(input.value);
             })
-            .catch(function () {
-                grid.innerHTML = '';
-                hint.textContent = 'No se pudo obtener la informacion de Pokemon.';
-            });
+            .catch(loadFromLocalBackup);
 
         form.addEventListener('submit', function (event) {
             event.preventDefault();
