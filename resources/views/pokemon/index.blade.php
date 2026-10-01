@@ -4,26 +4,6 @@
 @push('styles')
 <style>
 
-    .poke-header {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 20px 24px 0;
-    }
-
-    .poke-logo-ball {
-        width: 28px;
-        height: 28px;
-        object-fit: contain;
-    }
-
-    .poke-logo-text {
-        font-family: 'Press Start 2P', cursive;
-        font-size: 16px;
-        color: var(--pw-black);
-        text-decoration: none;
-    }
-
     .poke-search-wrap {
         max-width: 560px;
         margin: 28px auto 6px;

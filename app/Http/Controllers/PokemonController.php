@@ -24,6 +24,7 @@ class PokemonController extends Controller
         if (! $response->successful()) {
             return view('pokemon.error', [
                 'mensaje' => 'No se encontro el Pokemon solicitado.',
+                'bareLayout' => true,
             ]);
         }
 

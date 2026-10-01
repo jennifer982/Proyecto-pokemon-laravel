@@ -102,6 +102,44 @@
             font-family: 'Press Start 2P', cursive;
         }
 
+        .poke-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 20px 24px 0;
+        }
+
+        .poke-logo-ball {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+        }
+
+        .poke-logo-text {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 16px;
+            color: var(--pw-black);
+            text-decoration: none;
+        }
+
+        .poke-back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: auto;
+            font-family: 'Inter', Arial, sans-serif;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--pw-black);
+            text-decoration: none;
+            transition: transform 0.15s ease;
+        }
+
+        .poke-back-link:hover {
+            color: var(--pw-black);
+            transform: translateX(-3px);
+        }
+
         @media (prefers-reduced-motion: reduce) {
             * {
                 animation-duration: 0.01ms !important;
@@ -117,7 +155,7 @@
 <body>
 
     @php
-        $bareLayout = request()->is('/') || request()->is('pokemon');
+        $bareLayout = $bareLayout ?? (request()->is('/') || request()->is('pokemon'));
     @endphp
 
     @unless($bareLayout)
